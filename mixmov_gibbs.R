@@ -22,6 +22,7 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
   #run gibbs sampler
   for (i in 1:ngibbs){
     print(i)
+    print(table(z))
     
     #re-order clusters
     if (i < nburn & i%%50==0){
@@ -44,13 +45,15 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
     lphi=list()
     for (j in 1:ndata.types) lphi[[j]]=log(phi[[j]])
     z=sample.z(ncat.dat=ncat.dat,dat=dat,nmaxclust=nmaxclust,
-               lphi=lphi,ltheta=log(theta),ndata.types=ndata.types,nobs=nobs)
+               lphi=lphi,ltheta=log(theta),ndata.types=ndata.types,nobs=nobs,
+               z=z,alpha=alpha,phi=phi)
 
     theta=sample.v(z=z,gamma1=gamma1,nmaxclust=nmaxclust)
     # theta=theta.true
+
     phi=sample.phi(alpha=alpha,nmaxclust=nmaxclust,
                    ncat.dat=ncat.dat,ndata.types=ndata.types,dat=dat,z=z)
-
+    
     #calculate log-likelihood
     llk=get.llk(phi=phi,theta=theta,ndata.types=ndata.types,dat=dat,
                 nobs=nobs,nmaxclust=nmaxclust)    

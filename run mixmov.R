@@ -1,4 +1,4 @@
-rm(list=ls(all=TRUE))
+# rm(list=ls(all=TRUE))
 library('MCMCpack')
 library('Rcpp')
 set.seed(2)
@@ -14,9 +14,11 @@ gamma1=0.1
 alpha=0.1
 
 #prepare for gibbs
-ngibbs=1000
+ngibbs=10000
 nburn=ngibbs/2
 nmaxclust=10
-res=mixture_movement(dat=dat,gamma1=gamma1,alpha=alpha,
-                     ngibbs=ngibbs,nmaxclust=nmaxclust,
-                     nburn=nburn)
+model1=mixture_movement(dat=dat,gamma1=gamma1,alpha=alpha,
+                        ngibbs=ngibbs,nmaxclust=nmaxclust,
+                        nburn=nburn)
+
+

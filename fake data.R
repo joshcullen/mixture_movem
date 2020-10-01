@@ -1,10 +1,10 @@
 rm(list=ls(all=TRUE))
 library('MCMCpack')
-set.seed(4)
+set.seed(6)
 
 #basic settings
 nbehavior=6
-ncat.data=c(5,8)
+ncat.data=c(8,8)
 ndata.types=length(ncat.data)
 
 #get parameters

@@ -1,5 +1,5 @@
 sample.z=function(ncat.dat,dat, nmaxclust,
-                  lphi,ltheta,ndata.types,nobs){
+                  lphi,ltheta,ndata.types,nobs,z,alpha,phi){
   
   lprob=matrix(ltheta,nobs,nmaxclust,byrow=T)
   for (i in 1:nmaxclust){
@@ -7,13 +7,33 @@ sample.z=function(ncat.dat,dat, nmaxclust,
       lprob[,i]=lprob[,i]+lphi[[j]][i,dat[,j]]
     }
   }
-  max1=apply(lprob,1,max)
-  lprob=lprob-max1
-  tmp=exp(lprob)
-  prob=tmp/rowSums(tmp)
   
-  z=rmultinom1(prob=prob, randu=runif(nobs)) 
-  z+1
+  #get dirichlet densities
+  dirichlet.den=matrix(NA,ndata.types,nmaxclust)
+  for (j in 1:ndata.types){
+    dirichlet.den[j,]=log(ddirichlet(phi[[j]],rep(alpha,ncat.dat[j])))
+  }
+  dirichlet.den1=colSums(dirichlet.den)
+  
+  p1=sum(-log(ncat.dat))
+  for (i in 1:nobs){
+    maxz=max(z)
+    if (maxz==nmaxclust) lprob1=lprob[i,]
+    if (maxz<nmaxclust){
+      lprob1=lprob[i,1:maxz]+dirichlet.den1[maxz+1] #for existing groups
+      tmp=p1+ltheta[maxz+1] #for new group
+      lprob1=c(lprob1,tmp)
+    }
+    
+    max1=max(lprob1)
+    lprob1=lprob1-max1
+    tmp=exp(lprob1)
+    prob=tmp/sum(tmp)
+    
+    tmp=rmultinom(1, size=1,prob=prob) 
+    z[i]=which(tmp==1)
+  }
+  z
 }
 #-----------------------------------
 sample.v=function(z,gamma1,nmaxclust){
