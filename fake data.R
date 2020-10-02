@@ -10,7 +10,7 @@ ndata.types=length(ncat.data)
 #get parameters
 phi=list()
 for (i in 1:ndata.types){
-  phi[[i]]=rdirichlet(nbehavior,alpha=rep(0.1,ncat.data[i]))
+  phi[[i]]=rdirichlet(nbehavior,rep(0.1,ncat.data[i]))
 }
 theta.true=theta=rep(1/nbehavior,nbehavior)
 phi.true=phi
@@ -18,7 +18,11 @@ phi.true=phi
 #look at these parameters
 par(mfrow=c(ceiling(nbehavior/2),2),mar=rep(1,4))
 for (i in 1:nbehavior) plot(phi.true[[1]][i,],type='h',main=i)
+round(apply(phi.true[[1]],2,max),3)
+
+par(mfrow=c(ceiling(nbehavior/2),2),mar=rep(1,4))
 for (i in 1:nbehavior) plot(phi.true[[2]][i,],type='h',main=i)
+round(apply(phi.true[[2]],2,max),3)
 
 #generate data
 nobs=10000

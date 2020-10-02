@@ -14,7 +14,7 @@ plot(theta.estim,type='h')
 
 tmp=data.frame(zestim=model1$z,ztrue=z.true)
 tmp1=table(tmp); tmp1
-ordem=c(3,1,2,5,4,6)
+ordem=c(5,3,2,1,4,3)
 tmp1[ordem,]
 
 #look at phi's
