@@ -36,13 +36,6 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
     z=tmp$z
     nmat=tmp$nmat
     
-    # check nmat
-    # nmat1=list()
-    # for (i in 1:ndata.types){
-    #   nmat1[[i]]=SummarizeDat(z=z-1, dat=dat[,i]-1, ncateg=ncat.dat[i],nbehav=nmaxclust, nobs=nobs)
-    # }
-    # unique(nmat1[[2]]-nmat[[2]])
-    
     theta=sample.v(nmat=nmat,gamma1=gamma1,nmaxclust=nmaxclust)
     # theta=theta.true
 
