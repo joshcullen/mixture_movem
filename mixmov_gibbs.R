@@ -31,11 +31,14 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
     print(table(z))
     
     #sample from FCD's 
+    lphi=list()
+    for (j in 1:ndata.types) lphi[[j]]=log(phi[[j]])
     ltheta=log(theta)
-    tmp=sample.z(nobs=nobs,z=z,nmat=nmat,dat=dat,alpha=alpha,ncat.dat=ncat.dat,ltheta=ltheta)
-    z=tmp$z
-    nmat=tmp$nmat
-    
+    z=sample.z(nobs=nobs,nmaxclust=nmaxclust,dat=dat,ltheta=ltheta,lphi=lphi,ndata.types=ndata.types)
+    for (j in 1:ndata.types){
+      nmat[[j]]=SummarizeDat(z=z-1, dat=dat[,j]-1, ncateg=ncat.dat[j],nbehav=nmaxclust, nobs=nobs)
+    }
+
     theta=sample.v(nmat=nmat,gamma1=gamma1,nmaxclust=nmaxclust)
     # theta=theta.true
 

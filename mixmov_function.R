@@ -1,20 +1,18 @@
-sample.z=function(nobs,z,nmat,dat,alpha,ncat.dat,ltheta){
+sample.z=function(nobs,nmaxclust, dat, ltheta, lphi, ndata.types){
 
-  #this is the same for all data types because it  is the number of observations assigned to each behavior
-  ntot=rowSums(nmat[[1]]) 
-  randu=runif(nobs)
+  lprob=matrix(ltheta,nobs,nmaxclust,byrow=T)
+  for (i in 1:nmaxclust){
+    for (j in 1:ndata.types){
+      lprob[,i]=lprob[,i]+lphi[[j]][i,dat[,j]]
+    }
+  }
+  max1=apply(lprob,1,max)
+  lprob=lprob-max1
+  tmp=exp(lprob)
+  prob=tmp/rowSums(tmp)
   
-  res.cpp=sampleZ(nmat1=nmat[[1]], nmat2=nmat[[2]], z=z-1, dat=data.matrix(dat)-1,
-              ntot=ntot, ltheta=ltheta, randu=randu, NcatDat=ncat.dat,
-              nobs=nobs, nmaxclust=nmaxclust, alpha=alpha)
-  nmat=list()
-  nmat[[1]]=res.cpp$nmat1
-  nmat[[2]]=res.cpp$nmat2
-
-  # teste=SummarizeDat(z=res.cpp$z, dat=dat[,1]-1, ncateg=ncat.dat[1],nbehav=nmaxclust, nobs=nobs)
-  # unique(teste-res.cpp$nmat1)
-  
-  list(nmat=nmat,z=res.cpp$z+1)
+  z=rmultinom1(prob=prob, randu=runif(nobs)) 
+  z+1
 }
 #-----------------------------------
 sample.v=function(nmat,gamma1,nmaxclust){

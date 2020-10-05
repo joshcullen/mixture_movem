@@ -1,16 +1,25 @@
 rm(list=ls(all=TRUE))
 library('MCMCpack')
-set.seed(6)
+set.seed(319)
 
 #basic settings
-nbehavior=6
-ncat.data=c(8,8)
+nbehavior=5
+ncat.data=c(15,15)
 ndata.types=length(ncat.data)
 
 #get parameters
 phi=list()
 for (i in 1:ndata.types){
-  phi[[i]]=rdirichlet(nbehavior,rep(0.1,ncat.data[i]))
+  tmp=matrix(NA,nbehavior,ncat.data[i])
+  seq1=1:ncat.data[i]
+  mus=seq(from=2,to=ncat.data[i],length.out=nbehavior)
+  diff1=mus[2]-mus[1]
+  for (j in 1:nbehavior){
+    aux=dnorm(seq1,mean=mus[j],sd=diff1/4)
+    tmp[j,]=aux/sum(aux)
+  }
+  phi[[i]]=tmp
+  image(phi[[i]])
 }
 theta.true=theta=rep(1/nbehavior,nbehavior)
 phi.true=phi

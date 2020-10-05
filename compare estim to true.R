@@ -1,4 +1,5 @@
-seq1=1000:ngibbs
+seq1=1:ngibbs
+seq1=5000:ngibbs
 plot(model1$loglikel[seq1],type='l')
 
 compare=function(true1,estim1){
@@ -14,7 +15,7 @@ plot(theta.estim,type='h')
 
 tmp=data.frame(zestim=model1$z,ztrue=z.true)
 tmp1=table(tmp); tmp1
-ordem=c(5,3,2,1,4,3)
+ordem=c(5,4,1,2,3)
 tmp1[ordem,]
 
 #look at phi's

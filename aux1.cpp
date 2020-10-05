@@ -39,6 +39,18 @@ int cat1(double value, NumericVector prob) {
 
 //' This function samples z's from a categorical distribution
 // [[Rcpp::export]]
+IntegerVector rmultinom1(NumericMatrix prob, NumericVector randu) {
+  
+  IntegerVector z(prob.nrow());
+  
+  for(int i=0; i<prob.nrow();i++){
+    z[i]=cat1(randu[i],prob(i,_));
+  }
+  return z;
+}
+
+//' This function samples z's from a categorical distribution
+// [[Rcpp::export]]
 List sampleZ(IntegerMatrix nmat1, IntegerMatrix nmat2,
                       IntegerVector z, IntegerMatrix dat,
                       IntegerVector ntot, NumericVector ltheta,
