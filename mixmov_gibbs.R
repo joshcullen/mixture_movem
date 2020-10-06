@@ -4,7 +4,7 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
   
   #initial values
   z=sample(1:nmaxclust,size=nobs,replace=T)
-  ncat.dat=apply(dat,2,max)
+  ncat.dat=apply(dat,2,max,na.rm=T)
   phi=list()
   for (i in 1:ndata.types){
     phi[[i]]=matrix(1/ncat.dat[i],nmaxclust,ncat.dat[i])
@@ -24,6 +24,7 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
   }
   store.theta=matrix(NA,ngibbs,nmaxclust)
   store.loglikel=rep(NA,1)
+  max.llk=-Inf
   
   #run gibbs sampler
   for (i in 1:ngibbs){
@@ -39,7 +40,7 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
       nmat[[j]]=SummarizeDat(z=z-1, dat=dat[,j]-1, ncateg=ncat.dat[j],nbehav=nmaxclust, nobs=nobs)
     }
 
-    theta=sample.v(nmat=nmat,gamma1=gamma1,nmaxclust=nmaxclust)
+    theta=sample.v(z=z,gamma1=gamma1,nmaxclust=nmaxclust)
     # theta=theta.true
 
     phi=sample.phi(alpha=alpha,nmaxclust=nmaxclust,
@@ -75,6 +76,11 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
     }
   }
 
+  if (i > nburn & llk>max.llk){
+    z.max.llk=z
+    max.llk=llk
+  }
+  
   list(phi=store.phi,theta=store.theta,
-       loglikel=store.loglikel,z=z)  
+       loglikel=store.loglikel,z=z.max.llk)  
 }

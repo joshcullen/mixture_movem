@@ -3,7 +3,13 @@ sample.z=function(nobs,nmaxclust, dat, ltheta, lphi, ndata.types){
   lprob=matrix(ltheta,nobs,nmaxclust,byrow=T)
   for (i in 1:nmaxclust){
     for (j in 1:ndata.types){
-      lprob[,i]=lprob[,i]+lphi[[j]][i,dat[,j]]
+      #account for NA
+      tmp=lphi[[j]][i,dat[,j]]
+      cond=is.na(dat[,j])
+      tmp[cond]=0
+      
+      #finish calculation
+      lprob[,i]=lprob[,i]+tmp
     }
   }
   max1=apply(lprob,1,max)
@@ -15,8 +21,10 @@ sample.z=function(nobs,nmaxclust, dat, ltheta, lphi, ndata.types){
   z+1
 }
 #-----------------------------------
-sample.v=function(nmat,gamma1,nmaxclust){
-  tmp1=rowSums(nmat[[1]])
+sample.v=function(z,gamma1,nmaxclust){
+  tmp=table(z)
+  tmp1=rep(0,nmaxclust)
+  tmp1[as.numeric(names(tmp))]=tmp
   theta=v=rep(NA,nmaxclust)
   aux=1
   for (i in 1:(nmaxclust-1)){
@@ -46,7 +54,13 @@ get.llk=function(phi,theta,ndata.types,dat,nobs,nmaxclust){
   prob=matrix(theta,nobs,nmaxclust,byrow=T)
   for (i in 1:nmaxclust){
     for (j in 1:ndata.types){
-      prob[,i]=prob[,i]*phi[[j]][i,dat[,j]]
+      #account for NA      
+      tmp=phi[[j]][i,dat[,j]]
+      cond=is.na(dat[,j])
+      tmp[cond]=1
+      
+      #finish calculation
+      prob[,i]=prob[,i]*tmp
     }
   }
   sum(log(rowSums(prob)))
