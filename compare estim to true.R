@@ -15,7 +15,7 @@ plot(theta.estim,type='h')
 
 tmp=data.frame(zestim=model1$z,ztrue=z.true)
 tmp1=table(tmp); tmp1
-ordem=c(5,4,1,2,3)
+ordem=c(5,3,1,4,2)
 tmp1[ordem,]
 
 #look at phi's
@@ -25,3 +25,7 @@ for (j in 1:ndata.types){
   # phi1.estim=matrix(store.phi[[j]][ngibbs,],nmaxclust,ncat.data[j])
   compare(phi.true[[j]],phi1.estim[ordem,])
 }
+
+#look at gamma
+gamma1=model1$gamma1[seq1]
+plot(table(gamma1),type='h')

@@ -1,4 +1,4 @@
-mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
+mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
   nobs=nrow(dat)
   ndata.types=ncol(dat)
   
@@ -10,6 +10,7 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
     phi[[i]]=matrix(1/ncat.dat[i],nmaxclust,ncat.dat[i])
   }
   theta=rep(1/nmaxclust,nmaxclust)
+  gamma1=0.1
   
   #get nmat
   nmat=list()
@@ -23,10 +24,13 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
     store.phi[[i]]=matrix(NA,ngibbs,nmaxclust*ncat.dat[i])
   }
   store.theta=matrix(NA,ngibbs,nmaxclust)
-  store.loglikel=rep(NA,1)
-  max.llk=-Inf
+  store.loglikel=rep(NA,ngibbs)
+  store.gamma1=rep(NA,ngibbs)
   
   #run gibbs sampler
+  max.llk=-Inf
+  gamma.possib=seq(from=0.1,to=1,by=0.05) #possible values for gamma
+  
   for (i in 1:ngibbs){
     print(i)
     print(table(z))
@@ -40,11 +44,15 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
       nmat[[j]]=SummarizeDat(z=z-1, dat=dat[,j]-1, ncateg=ncat.dat[j],nbehav=nmaxclust, nobs=nobs)
     }
 
-    theta=sample.v(z=z,gamma1=gamma1,nmaxclust=nmaxclust)
+    tmp=sample.v(z=z,gamma1=gamma1,nmaxclust=nmaxclust)
+    theta=tmp$theta
+    v=tmp$v
     # theta=theta.true
 
     phi=sample.phi(alpha=alpha,nmaxclust=nmaxclust,
                    ncat.dat=ncat.dat,ndata.types=ndata.types,nmat=nmat)
+    
+    gamma1=sample.gamma(v=v,ngroup=nmaxclust,gamma.possib=gamma.possib)    
     
     #calculate log-likelihood
     llk=get.llk(phi=phi,theta=theta,ndata.types=ndata.types,dat=dat,
@@ -56,6 +64,7 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
     }
     store.theta[i,]=theta
     store.loglikel[i]=llk
+    store.gamma1[i]=gamma1
     
     #re-order clusters
     if (i < nburn & i%%50==0){
@@ -82,5 +91,6 @@ mixture_movement=function(dat,gamma1,alpha,ngibbs,nmaxclust,nburn){
   }
   
   list(phi=store.phi,theta=store.theta,
-       loglikel=store.loglikel,z=z.max.llk)  
+       loglikel=store.loglikel,z=z.max.llk,
+       gamma1=store.gamma1)  
 }

@@ -1,5 +1,4 @@
 sample.z=function(nobs,nmaxclust, dat, ltheta, lphi, ndata.types){
-
   lprob=matrix(ltheta,nobs,nmaxclust,byrow=T)
   for (i in 1:nmaxclust){
     for (j in 1:ndata.types){
@@ -35,7 +34,7 @@ sample.v=function(z,gamma1,nmaxclust){
   }
   v[nmaxclust]=1
   theta[nmaxclust]=aux
-  theta
+  list(theta=theta,v=v)
 }
 #-----------------------------------
 sample.phi=function(alpha,nmaxclust,ncat.dat,ndata.types,nmat){
@@ -64,4 +63,26 @@ get.llk=function(phi,theta,ndata.types,dat,nobs,nmaxclust){
     }
   }
   sum(log(rowSums(prob)))
+}
+#------------------------------------
+sample.gamma=function(v,ngroup,gamma.possib){
+  #calculate the log probability associated with each possible value of gamma
+  cond=v>0.9999999
+  v[cond]=0.9999999
+  
+  ngamma=length(gamma.possib)
+  soma=sum(log(1-v[-ngroup]))
+  k=(ngroup-1)*(lgamma(1+gamma.possib)-lgamma(gamma.possib))
+  res=k+(gamma.possib-1)*soma
+  #check this code: sum(dbeta(v[-ngroup],1,gamma.possib[5],log=T))
+  
+  #exponentiate and normalize probabilities
+  res=res-max(res)
+  res1=exp(res)
+  res2=res1/sum(res1)
+  
+  #sample from a categorical distribution
+  tmp=rmultinom(1,size=1,prob=res2)
+  ind=which(tmp==1)
+  gamma.possib[ind]
 }
