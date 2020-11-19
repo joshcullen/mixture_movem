@@ -26,14 +26,19 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
   store.theta=matrix(NA,ngibbs,nmaxclust)
   store.loglikel=rep(NA,ngibbs)
   store.gamma1=rep(NA,ngibbs)
+  store.z<- list()
   
   #run gibbs sampler
   max.llk=-Inf
   gamma.possib=seq(from=0.1,to=1,by=0.05) #possible values for gamma
   
+  #progress bar
+  pb <- progress::progress_bar$new(
+    format = " iteration (:current/:total) [:bar] :percent [Elapsed: :elapsed, Remaining: :eta]",
+    total = ngibbs, clear = FALSE, width = 100)
+  
   for (i in 1:ngibbs){
-    print(i)
-    print(table(z))
+    pb$tick()  #create progress bar
     
     #sample from FCD's 
     lphi=list()
@@ -47,8 +52,7 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
     tmp=sample.v(z=z,gamma1=gamma1,nmaxclust=nmaxclust)
     theta=tmp$theta
     v=tmp$v
-    # theta=theta.true
-
+    
     phi=sample.phi(alpha=alpha,nmaxclust=nmaxclust,
                    ncat.dat=ncat.dat,ndata.types=ndata.types,nmat=nmat)
     
@@ -65,6 +69,7 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
     store.theta[i,]=theta
     store.loglikel[i]=llk
     store.gamma1[i]=gamma1
+    store.z[[i]]=z
     
     #re-order clusters
     if (i < nburn & i%%50==0){
@@ -85,12 +90,28 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
     }
   }
 
-  if (i > nburn & llk>max.llk){
-    z.max.llk=z
-    max.llk=llk
-  }
+  # if (i > nburn & llk>max.llk){
+  #   max.llk=llk
+  #   
+  #   theta.max.llk=theta
+  #   names(theta.max.llk)<- 1:length(theta.max.llk)
+  #   theta.max.llk<- theta.max.llk %>% sort(decreasing = T)
+  #   ord<- names(theta.max.llk)
+  #   
+  #   phi.max.llk=phi
+  #   phi.max.llk<- lapply(phi.max.llk, t)
+  #   phi.max.llk<- lapply(phi.max.llk, function(x) x[,as.numeric(ord)])
+  #   
+  #   z.max.llk=z
+  #   z.max.llk<- factor(z.max.llk)
+  #   levels(z.max.llk)<- ord
+  #   z.max.llk<- as.numeric(as.character(z.max.llk))
+  # }
   
   list(phi=store.phi,theta=store.theta,
-       loglikel=store.loglikel,z=z.max.llk,
-       gamma1=store.gamma1)  
+       loglikel=store.loglikel,z=store.z,
+       gamma1=store.gamma1)
+  # list(phi=phi.max.llk,theta=theta.max.llk,
+  #      loglikel=store.loglikel,z=z.max.llk,
+  #      gamma1=store.gamma1)  
 }
