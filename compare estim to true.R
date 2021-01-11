@@ -13,7 +13,19 @@ theta.estim=model1$theta[ngibbs,]
 # theta.estim=store.theta[ngibbs,]
 plot(theta.estim,type='h')
 
-tmp=data.frame(zestim=model1$z,ztrue=z.true)
+#get z.estim (mode)
+nobs=nrow(model1$z.posterior)
+z.estim=rep(NA,nobs)
+for (i in 1:nobs){
+  ind=which(model1$z.posterior[i,]==max(model1$z.posterior[i,]))
+  z.estim[i]=ind
+}
+
+k=data.frame(z.post=z.estim,z.map=model1$z.MAP)
+table(k)
+
+#compare with true
+tmp=data.frame(zestim=z.estim,ztrue=z.true)
 tmp1=table(tmp); tmp1
 ordem=c(5,3,1,4,2)
 tmp1[ordem,]
@@ -27,5 +39,5 @@ for (j in 1:ndata.types){
 }
 
 #look at gamma
-gamma1=model1$gamma1[seq1]
+gamma1=model1$gamma1
 plot(table(gamma1),type='h')

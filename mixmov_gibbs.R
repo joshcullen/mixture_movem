@@ -26,7 +26,7 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
   store.theta=matrix(NA,ngibbs,nmaxclust)
   store.loglikel=rep(NA,ngibbs)
   store.gamma1=rep(NA,ngibbs)
-  store.z<- list()
+  store.z=matrix(0,nobs,nmaxclust)
   
   #run gibbs sampler
   max.llk=-Inf
@@ -36,6 +36,7 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
   pb <- progress::progress_bar$new(
     format = " iteration (:current/:total) [:bar] :percent [Elapsed: :elapsed, Remaining: :eta]",
     total = ngibbs, clear = FALSE, width = 100)
+  
   
   for (i in 1:ngibbs){
     pb$tick()  #create progress bar
@@ -48,10 +49,11 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
     for (j in 1:ndata.types){
       nmat[[j]]=SummarizeDat(z=z-1, dat=dat[,j]-1, ncateg=ncat.dat[j],nbehav=nmaxclust, nobs=nobs)
     }
-
+    
     tmp=sample.v(z=z,gamma1=gamma1,nmaxclust=nmaxclust)
     theta=tmp$theta
     v=tmp$v
+    # theta=theta.true
     
     phi=sample.phi(alpha=alpha,nmaxclust=nmaxclust,
                    ncat.dat=ncat.dat,ndata.types=ndata.types,nmat=nmat)
@@ -69,7 +71,10 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
     store.theta[i,]=theta
     store.loglikel[i]=llk
     store.gamma1[i]=gamma1
-    store.z[[i]]=z
+    
+    if (i> nburn){
+      store.z=StoreZ(z=z-1,store_z=store.z,nobs=nobs)
+    }
     
     #re-order clusters
     if (i < nburn & i%%50==0){
@@ -89,29 +94,14 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
       z=znew
     }
   }
-
-  # if (i > nburn & llk>max.llk){
-  #   max.llk=llk
-  #   
-  #   theta.max.llk=theta
-  #   names(theta.max.llk)<- 1:length(theta.max.llk)
-  #   theta.max.llk<- theta.max.llk %>% sort(decreasing = T)
-  #   ord<- names(theta.max.llk)
-  #   
-  #   phi.max.llk=phi
-  #   phi.max.llk<- lapply(phi.max.llk, t)
-  #   phi.max.llk<- lapply(phi.max.llk, function(x) x[,as.numeric(ord)])
-  #   
-  #   z.max.llk=z
-  #   z.max.llk<- factor(z.max.llk)
-  #   levels(z.max.llk)<- ord
-  #   z.max.llk<- as.numeric(as.character(z.max.llk))
-  # }
+  
+  if (i > nburn & llk>max.llk){
+    z.MAP=z
+    max.llk=llk
+  }
   
   list(phi=store.phi,theta=store.theta,
-       loglikel=store.loglikel,z=store.z,
-       gamma1=store.gamma1)
-  # list(phi=phi.max.llk,theta=theta.max.llk,
-  #      loglikel=store.loglikel,z=z.max.llk,
-  #      gamma1=store.gamma1)  
+       loglikel=store.loglikel,z.MAP=z.MAP,
+       z.posterior=store.z,
+       gamma1=store.gamma1)  
 }

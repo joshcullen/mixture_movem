@@ -52,3 +52,13 @@ IntegerVector rmultinom1(NumericMatrix prob, NumericVector randu) {
   }
   return z;
 }
+
+//' This function helps store z from all iterations after burn in
+// [[Rcpp::export]]
+IntegerMatrix StoreZ(IntegerVector z, IntegerMatrix store_z, int nobs) {
+  
+  for(int i=0; i<nobs;i++){
+    store_z(i,z[i])=store_z(i,z[i])+1;
+  }
+  return store_z;
+}
